@@ -268,3 +268,8 @@ def moderate_disable(id):
     db.session.add(comment)
     return redirect(url_for('.moderate',
                             page=request.args.get('page', 1, type=int)))
+
+@main.route('/japanese_plz')
+#@login_required
+def plz():
+    return render_template('plz.html')

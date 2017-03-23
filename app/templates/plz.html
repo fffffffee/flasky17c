@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PLZ V3.25</title>
+    <script>
+        //--------------------------------------------------------------------------------------------------------//
+        var Delay = 5;          //延时5秒，可更改
+        var bookRange = 6265;   //页码范围
+        var row = 10;           //10行
+        var col = 5;            //5 列         
+        var bookIndex = 1;      //起始页码
+        var fetchIndex;
+
+        var delay;        
+        var book;
+        var fetchTimer;
+        var MyTimer;
+        var MyDiv;
+        //--------------------------------------------------------------------------------------------------------//
+        var systemOnLoad = function (val){
+            page = "";
+            book = "";
+            $("JmpLabel").innerHTML = "跳转(" + "1-" + bookRange + ")";
+
+            creatImageTable();
+        }
+
+        var $ = function (x) {
+            return document.getElementById(x);
+        }
+        //--------------------------------------------------------------------------------------------------------//
+        var adjustPage = function (pindex) {
+            var page;
+            if (pindex < 10) {
+                page = "000" + pindex;
+            }
+            else if (pindex < 100) {
+                page = "00" + pindex;
+            }
+            else if (pindex < 1000) {
+                page = "0" + pindex;
+            }
+
+            return page;
+        }
+
+        var adjustBook = function () {
+            if (bookIndex < 10) {
+                book = "00" + bookIndex;
+            }
+            else if (bookIndex < 100) {
+                book = "0" + bookIndex;
+            }
+            else {
+                book = "" + bookIndex;
+            }
+
+            $("bookInfo").innerHTML = "第 " + bookIndex + " 册";
+        }
+
+        var creatImageTable = function () {
+            var container = $("container");
+
+            if(MyDiv !== undefined){
+                container.removeChild(MyDiv);
+            }     
+
+            MyDiv = document.createElement("div");
+            for (var i = 0; i < row; i++) {
+                var diver = document.createElement("div");
+                for (var j = 0; j < col; j++) {
+                    var index = i * col + j + 1;
+                    var image = document.createElement("img");
+                    image.id = "image_" + index;
+                    image.src = "";
+                    diver.appendChild(image);
+                }
+                MyDiv.appendChild(diver);
+            }
+            container.appendChild(MyDiv);
+            setImageTable();                        
+        }
+
+        var setImageTable = function () {
+            var pageIndex = 1;
+            fetchIndex = 0;
+            adjustBook();
+            fetchTimer = setInterval(function () { fetch1(); }, 20);
+        }
+
+        var fetch1 = function(){
+            if(fetchIndex !== row * col){
+                var i = row * col  - fetchIndex;
+                var page1 = adjustPage(i);
+                var path1 = "http://db.sido.keio.ac.jp/kanseki/flipping/007075-" + book + "/007075-" + book + "/assets/flash/pages/page" + page1 + "_l.jpg?rnd=6B9C70D63C9D11DFA0D46B6255D89593";
+                $("image_" + i).src = path1;
+                ++fetchIndex;
+                return;
+            }
+            TimerStop(fetchTimer);
+            TimerStart();
+        }
+
+        // var fetch2 = function(){
+        //     if(fetchIndex * 2 !== row * col){
+        //         var i = row * col / 2 - fetchIndex;
+        //         var j = row * col / 2 + fetchIndex + 1;
+        //         var page1 = adjustPage(i);
+        //         var page2 = adjustPage(j);
+        //         var path1 = "http://db.sido.keio.ac.jp/kanseki/flipping/007075-" + book + "/007075-" + book + "/assets/flash/pages/page" + page1 + "_l.jpg?rnd=6B9C70D63C9D11DFA0D46B6255D89593";
+        //         var path2 = "http://db.sido.keio.ac.jp/kanseki/flipping/007075-" + book + "/007075-" + book + "/assets/flash/pages/page" + page2 + "_l.jpg?rnd=6B9C70D63C9D11DFA0D46B6255D89593";
+        //         $("image_" + i).src = path1;
+        //         $("image_" + j).src = path2;
+        //         ++fetchIndex;
+        //         return;
+        //     }
+        //     TimerStop(fetchTimer);
+        //     TimerStart();
+        // }
+        //--------------------------------------------------------------------------------------------------------//
+        var clickNext = function (val) {
+            if(delay > 0) return;
+            if (bookIndex == 1 && val == -1 || bookIndex == bookRange && val == 1)
+                return;
+
+            bookIndex += val;
+            adjustBook();
+            
+            creatImageTable();
+        }
+
+        var Jump = function () {
+            if(delay > 0) return;
+            try {
+                var str = $("Jmp").value;
+                var j = parseInt(str);
+
+                if (str === "") {
+                    alert("请输入页码！");
+                    return;
+                }
+                else if (j <= 0 || j > bookRange) {
+                    alert("范围为（1-" + bookRange + "）");
+                    return;
+                }
+                bookIndex = j;
+                adjustBook();
+                $("Jmp").value="";
+
+                creatImageTable();
+            }
+            catch (e) {
+                alert("@@@@@");
+            }
+        }
+        //--------------------------------------------------------------------------------------------------------//
+        var TimerStart = function () {
+            delay = Delay + 1;
+            if(MyTimer != null)
+                TimerStop(MyTimer);
+            MyTimer = setInterval(function () { TimeOut(); }, 1000);
+        }
+
+        var TimerStop = function (e) {
+            clearInterval(e);
+        }
+
+        var TimeOut = function () {
+            if ((--delay) === 0) {
+                for (var i = 0; i < row; i++) {
+                    for (var j = 0; j < col; j++) {
+                        var index = row * col - (i * col + j);
+                        var image = $("image_" + index);
+                        if (image.naturalWidth === 0 || image.naturalHeight === 0) {
+                            image.parentNode.removeChild(image);
+                        }
+                        else {
+                            TimerStop(MyTimer);
+                            $("info").innerHTML="<b>(Tips:右键点击图片另存为 或 右键点击空白处选择迅雷下载全部链接)</b>";
+                            return;
+                        }
+                    }
+                }
+            } 
+            if(delay<=0)    TimerStop(MyTimer);
+            $("info").innerHTML="<b>请等待图片加载: "+delay+"</b>";
+        }
+        //--------------------------------------------------------------------------------------------------------//
+    </script>
+
+    <style>
+        button {
+            width: 100px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;            
+        }
+        img {
+            width: 250px;
+            background-color: lightblue;
+            margin-left: 3px;
+            margin-right: 3px;
+        }
+        input {
+            height: 20px;
+        }
+        a {
+            font-size: 18px;
+            cursor: default;
+        }
+        a.label {
+            border: 1px solid lightgray;
+            font-size: 22px;
+            color: #00ff00;
+            cursor: pointer;
+        }
+        h1 {
+            text-align: center;
+            font-size: 18px;
+            cursor: default;
+        }
+        .header {
+            font-size: 34px;
+            color: white;
+            text-align: center;
+        }
+        #header {
+            padding-bottom: 2px;
+            padding-top: 2px;
+            background-color: darkcyan;
+        }
+
+        #ctrl {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        #container {
+            width: auto;
+            height: auto;
+            border: 2px solid darkcyan;
+            text-align: center;
+        }
+        #delaySec{
+            color:orangered;
+        }
+        div {
+            padding-top: 3px;
+        }
+    </style>
+</head>
+
+<body onload="systemOnLoad()" onselectstart="return false">
+
+    <div id="header">
+        <h1 class="header">《毗卢藏》下载(V3.25)</h1>
+    </div>
+
+    <div id="ctrl">
+        <h1 id="bookInfo"></h1>        
+        <button onclick="clickNext(-1)"><b>上一册</b></button>
+        <a id="JmpLabel"></a>
+        <input type="number" id="Jmp" value=""></input>
+        <a class="label" onclick="Jump()"><b>Go</b></a>
+        <button onclick="clickNext(1)"><b>下一册</b></button>  
+        <a href="http://db.sido.keio.ac.jp/kanseki/T_bib_frame.php?id=007075" target="_blank">访问网站</a>  
+        <h1 id="info"></h1>    
+    </div>
+
+    <div id="container">
+    </div>
+</body>
+
+</html>
