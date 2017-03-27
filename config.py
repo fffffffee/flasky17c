@@ -12,13 +12,13 @@ class Config:
     #MAIL_SERVER = 'smtp.126.com'
     #MAIL_PORT = 25
     #MAIL_USE_TLS = False
-    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_SERVER = 'smtp-mail.outlook.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = MAILUSERNAME
     MAIL_PASSWORD = MAILPASSWORD
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
-    FLASKY_MAIL_SENDER = 'ffffffflv@gmail.com'
+    FLASKY_MAIL_SENDER = 'fffffffee@live.com'
     FLASKY_ADMIN = FLASKYADMIN
     FLASKY_POSTS_PER_PAGE = 20
     FLASKY_FOLLOWERS_PER_PAGE = 50
