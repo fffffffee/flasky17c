@@ -273,3 +273,13 @@ def moderate_disable(id):
 #@login_required
 def plz():
     return render_template('plz.html')
+
+@main.route('/ygz')
+#@login_required
+def ygz():
+    return render_template('ygz.html')
+
+@main.route('/ygz_HD')
+#@login_required
+def ygz_HD():
+    return render_template('ygz_HD.html')

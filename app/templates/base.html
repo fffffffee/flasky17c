@@ -24,7 +24,8 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="{{ url_for('main.plz') }}">毗卢藏</a></li>
-                
+                <li><a href="{{ url_for('main.plz') }}">元宫藏</a></li>
+                <li><a href="{{ url_for('main.plz') }}">元宫藏-超高清</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.can(Permission.MODERATE_COMMENTS) %}

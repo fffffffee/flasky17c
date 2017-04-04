@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>YGZ V1.65</title>
+    <script>
+        //------------------------------------------------------------------------//
+        var row;      //max 12
+        var col;      //max 18    
+        var side = 256; 
+
+        var volumeCount = 32;
+        var volumeIndex;
+        var bookRange;
+        var bookIndex;
+
+        var imgLevel;   // 1, 2, 3, 4
+
+        var book;
+        var Delay;
+        var delays;
+        var separate;
+
+        var MyCanvas;
+        var MyContext;
+        var MyTimer;
+        var MyDiv;        
+        //------------------------------------------------------------------------//
+        var volumeNameAry=new Array("大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","大般若波羅蜜多經六百卷","小品般若波羅蜜經十卷","大寶積經一百二十卷","大方等大集經六十卷","無言童子經二卷","自在王菩薩經二卷","大集大虛空藏菩薩所問經八卷","阿惟越致遮經三卷","大方便佛報恩經七卷","法集經六卷","佛說頂生王因緣經六卷","不空羂索陀羅尼自在王咒經三卷","菩提場莊嚴陀羅尼經一卷","觀自在大悲成就瑜伽蓮華部念誦法門一卷","彌沙塞部五分律三十卷","五分彌沙塞比丘戒本","四分律藏六十卷","根本說一切有部毗奈耶藥事十八卷","十地經論十二卷","釋摩訶衍論十卷","釋摩訶衍論十卷","眾經目錄","眾經目錄","續高僧傳三十卷","大慧普覺禪師住徑山能仁禪院語錄四卷");
+        var linkAry=new Array("http://221.213.44.205/qt-tsxq.html?id=595","http://221.213.44.205/qt-tsxq.html?id=596","http://221.213.44.205/qt-tsxq.html?id=597","http://221.213.44.205/qt-tsxq.html?id=598","http://221.213.44.205/qt-tsxq.html?id=599","http://221.213.44.205/qt-tsxq.html?id=600","http://221.213.44.205/qt-tsxq.html?id=601","http://221.213.44.205/qt-tsxq.html?id=602","http://221.213.44.205/qt-tsxq.html?id=281","http://221.213.44.205/qt-tsxq.html?id=278","http://221.213.44.205/qt-tsxq.html?id=271","http://221.213.44.205/qt-tsxq.html?id=272","http://221.213.44.205/qt-tsxq.html?id=274","http://221.213.44.205/qt-tsxq.html?id=291","http://221.213.44.205/qt-tsxq.html?id=275","http://221.213.44.205/qt-tsxq.html?id=286","http://221.213.44.205/qt-tsxq.html?id=290","http://221.213.44.205/qt-tsxq.html?id=282","http://221.213.44.205/qt-tsxq.html?id=277","http://221.213.44.205/qt-tsxq.html?id=276","http://221.213.44.205/qt-tsxq.html?id=280","http://221.213.44.205/qt-tsxq.html?id=273","http://221.213.44.205/qt-tsxq.html?id=354","http://221.213.44.205/qt-tsxq.html?id=279","http://221.213.44.205/qt-tsxq.html?id=284","http://221.213.44.205/qt-tsxq.html?id=283","http://221.213.44.205/qt-tsxq.html?id=591","http://221.213.44.205/qt-tsxq.html?id=592","http://221.213.44.205/qt-tsxq.html?id=593","http://221.213.44.205/qt-tsxq.html?id=594","http://221.213.44.205/qt-tsxq.html?id=287","http://221.213.44.205/qt-tsxq.html?id=285");
+        var PageAry=new Array(31,16,28,32,26,14,12,32,29,37,22,33,30,10,34,35,32,14,3,40,22,9,30,32,20,25,8,28,25,30,44,17);
+        var BookIdAry=new Array(595,596,597,598,599,600,601,602,281,278,271,272,274,291,275,286,290,282,277,276,280,273,354,279,284,283,591,592,593,594,287,285);
+        var Wid_Hei=new Array(20,16,10,9,6,5,4,3);
+        var path = "http://221.213.44.205/medias/";
+        //------------------------------------------------------------------------//
+        var SystemOnload = function () {
+            MyCanvas = $("canvas");
+            MyContext = MyCanvas.getContext("2d");
+            volumeIndex = 1;
+            imgLevel = 4;
+            Delay = 5;
+            separate = false;
+            bookRange = PageAry[volumeIndex - 1];
+            bookIndex = 1;
+            col=Wid_Hei[2 * imgLevel - 2];
+            row=Wid_Hei[2 * imgLevel - 1];
+     
+            SetBookMark();             
+            $("Cell_"+volumeIndex).style.backgroundColor="gold";
+            $("level_"+imgLevel).style.backgroundColor="lightgreen";
+            $("JmpLabel").innerHTML = "跳转(" + "1-" + PageAry[volumeIndex - 1] + ")";
+            $("volName").innerHTML=volumeNameAry[volumeIndex - 1];  
+            $("volName").href=linkAry[volumeIndex - 1];  
+
+            GetImage();
+        }
+
+        var SetBookMark =  function(){
+            var tb=$("bookMark");
+            var newRow=tb.insertRow(-1);
+            var cell;
+            var index;
+            for(var i=0;i<volumeCount;i++){
+                cell = newRow.insertCell(-1);
+                index = i + 1;   
+                cell.id='Cell_'+ index;  
+                cell.innerHTML="第<br/>"+index+"<br/>部";                                   
+                cell.onclick=function(){ClickCell(this.id)};
+            }  
+        }
+
+        var Adjust = function () {
+            if (bookIndex < 10) {
+                book = "000" + bookIndex;
+            }
+            else if (bookIndex < 100) {
+                book = "00" + bookIndex;
+            }
+            else if (bookIndex < 1000) {
+                book = "0" + bookIndex;
+            }
+            else {
+                book = "" + bookIndex;
+            }
+        }
+
+        var $ = function (x) {
+            return document.getElementById(x);
+        }
+
+        var CheckSeparate = function(){
+            if(separate){
+                $("canDiv2").removeChild($("canvas_2"));
+                $("canDiv1").style.width = "96%";
+                $("canDiv2").style.width = "0%";
+                $("canDiv2").style.visibility = "hidden";
+                separate = false;
+            }
+        }
+        //------------------------------------------------------------------------//
+        var SelectImgLevel = function(e){
+            if(delay > 0)   return;
+            CheckSeparate();           
+            var i = parseInt(e.substring(6));
+            $("level_"+imgLevel).style.backgroundColor = "";
+            $(e).style.backgroundColor = "lightgreen";
+            imgLevel = i;
+
+            col=Wid_Hei[2 * imgLevel - 2];
+            row=Wid_Hei[2 * imgLevel - 1];
+            
+            GetImage();
+        }
+
+        var ClickCell = function(e){
+            if(delay > 0)   return;
+            CheckSeparate();           
+            var index = parseInt(e.substring(5));
+            $("Cell_"+volumeIndex).style.backgroundColor="";
+            volumeIndex = index;
+
+            bookRange = PageAry[volumeIndex - 1];
+            bookIndex = 1;
+            $("Cell_"+volumeIndex).style.backgroundColor="gold";
+            $("JmpLabel").innerHTML = "跳转(" + "1-" + PageAry[volumeIndex - 1] + ")";
+            $("volName").innerHTML = volumeNameAry[volumeIndex - 1];
+            $("volName").href = linkAry[volumeIndex - 1];
+            GetImage();            
+        }
+
+        var ClickNext = function (e){
+            if(delay > 0)   return;
+            CheckSeparate();           
+            if (bookIndex <= 1 && e == -1 || bookIndex >= bookRange && e == 1)
+                return;
+
+            bookIndex += e;
+            GetImage();        
+        }
+
+        var Jump = function () {
+            if(delay > 0)   return;            
+            try {
+                var str = $("Jmp").value;
+                var j = parseInt(str);
+
+                if (str === "") {
+                    alert("请输入页码！");                    
+                    return;
+                }
+                else if(str === "0000"){ 
+                    CheckSeparate(); 
+                    separate = true;                
+                    GetImage();                
+                    return;
+                }
+                else if (j <= 0 || j > bookRange) {
+                    alert("范围为（1-" + bookRange + "）");                
+                    return;
+                }
+                CheckSeparate();
+                bookIndex = j;                
+                GetImage();
+            }
+            catch (e) {
+                alert("@@@@@");
+            }
+        }
+        //------------------------------------------------------------------------//
+        var GetImage = function () {
+            var container=$("imgDiv");
+            $("info").innerHTML = "";
+            MyDiv = document.createElement("div");
+            Adjust();
+            $("page").innerHTML= "第  " + bookIndex + "  页";
+            var url = path + BookIdAry[volumeIndex - 1] + "/tiles/" + book + "/" + imgLevel + "/";        
+           // url=path+"277/tiles/0003_%E5%89%AF%E6%9C%AC/"+imgLevel+"/";
+            for(var i=0;i<row;i++){
+                var diver = document.createElement("div");
+                for(var j=0;j<col;j++){
+                    var index = i * col + j + 1;
+                    var image_x = document.createElement("img");               
+                    var imgUrl = url + j +"/" + i +".jpg";
+                    image_x.id="image_"+index;                    
+                    image_x.style.width="50px";
+                    image_x.style.height="50px";
+                    image_x.style.marginLeft="6px";   
+                                  
+                    //imgUrl = "H:/BUDDHISM/大藏经/元宫藏/sss/0.png";      
+                    image_x.src = imgUrl;
+                    diver.appendChild(image_x);
+                }                
+                MyDiv.appendChild(diver);
+            }
+            container.appendChild(MyDiv);
+            TimerStart();
+        }
+        
+        var DarwOnCanvas = function () {
+            var natrW = 0;
+            var natrH = 0;
+
+            for (var j = 0; j < col; j++) {
+                var index = j + 1;
+
+                var imageObj = $("image_" + index);
+                if (imageObj.naturalWidth != 0) {
+                    natrW += imageObj.naturalWidth;
+                }
+            }
+
+            for (var j = 0; j < row; j++) {
+                var index = j*col + 1;
+
+                var imageObj = $("image_" + index);
+                if (imageObj.naturalHeight != 0) {
+                    natrH += imageObj.naturalHeight;
+                }
+            }
+
+            MyCanvas.width = natrW;
+            MyCanvas.height = natrH;            
+            if(separate){
+                var container=$("canDiv2");
+                var canvas2=document.createElement("canvas");
+                canvas2.id="canvas_2";
+                var context2=canvas2.getContext("2d");
+                var sep = Math.floor(natrW / 256);
+                sep = Math.ceil(sep/2);                
+                MyCanvas.width = sep * 256;   
+                canvas2.width = natrW - sep *256;
+                canvas2.height = natrH;             
+            }            
+
+            for (var i = 0; i < row; i++) {
+                for (var j = 0; j < col; j++) {
+                    var index = i * col + j + 1;
+                    var image = $("image_" + index);
+                    if (image.naturalWidth != 0) {                        
+                        if(separate) {
+                            if(j < sep)
+                                MyContext.drawImage(image, j * side, i * side);
+                            else
+                                context2.drawImage(image, (j-sep) * side, i * side);
+                        }
+                        else{
+                            MyContext.drawImage(image, j * side, i * side);
+                        }
+                    }
+                }
+            }
+            if(separate){
+                $("canDiv1").style.width = "48%";
+                $("canDiv2").style.width = "48%";
+                $("canDiv2").style.visibility = "visible";
+                container.appendChild(canvas2);                
+            }
+        }
+        //------------------------------------------------------------------------//
+        var TimerStart = function () {
+            clearTimeout();
+            delay = Delay - imgLevel;
+            MyTimer = setInterval(function () { TimeOut(); },1000);
+        }
+
+        var TimerStop = function () {
+            clearInterval(MyTimer);
+        }
+
+        var TimeOut = function () {
+            if ((--delay) === 0) {
+                TimerStop();
+                DarwOnCanvas();                            
+                $("imgDiv").removeChild(MyDiv);
+                $("info").style.color="green";
+                $("info").innerHTML="Tips:1.鼠标右键单击图片另存为 2.超清图片建议使用Chrome浏览器下载 3.保存前请检查图片合成是否完整";
+                return;
+            }
+            if(delay<0) TimerStop();
+            $("info").innerHTML="请等待图片加载: "+ delay;
+            $("info").style.color="orange";
+        }
+        //------------------------------------------------------------------------//
+    </script>
+
+    <style>
+        button {
+            width: 100px;
+            height: 30px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        #CanvasContainer{       
+            padding-left: 1%;
+            overflow: scroll;  
+            text-align: center;  
+            float: center;   
+            width: 100%;
+            max-height: 1000px;        
+            border: 1px solid darkcyan;      
+        }
+        .canvas {
+            border: 1px solid darkcyan;
+            background: lightgray;            
+        }
+        table{
+            width: 100%;
+        }
+        #pxLevel{
+            float: center;            
+            width: 50%;
+        }
+        td{
+            border: 1px solid darkcyan;
+            text-align: center;
+            cursor: pointer;
+        }
+        td:hover{
+            background: lightgoldenrodyellow;
+        }
+        td.level{            
+            font-size: 22px;
+            background-color: whitesmoke;
+        }
+        td.level:hover{                        
+            background-color:#ccffdd;
+        }
+        input {
+            height: 20px;
+        }
+        a{
+            font-size: 20px;
+            cursor: default;            
+        }
+        #jump{
+            border: 1px solid lightgray;
+            font-size: 22px;
+            color: #00ff00;
+            cursor: pointer;
+        }
+        h1 {
+            text-align: center;
+            font-size: 20px;
+        }
+        .head {
+            font-size: 34px;
+            color: white;
+            text-align: center;
+        }
+        #header {
+            padding-bottom: 2px;
+            padding-top: 2px;
+            background-color: darkcyan;
+        }
+        #ctrl {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        #imgDiv {
+            text-align: left;
+            margin-left: 2%;
+        }
+        #canDiv1{
+            overflow: scroll;        
+            float: left;            
+            width: 96%;            
+            margin-left: 2%;
+            /*max-height: 500px;   */
+            border: 1px solid darkcyan;
+        }
+        #canDiv2{
+            overflow: scroll;        
+            float: left;            
+            width: 0%;                                    
+            visibility:hidden;
+            border: 1px solid darkcyan;
+        }
+        div {
+            padding-top: 3px;
+            text-align: center;
+        }
+        #volName{
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #page{
+            font-size: 24px;
+            color: mediumpurple;
+        }
+    </style>
+</head>
+
+<body onload="SystemOnload()" onselectstart="return false">
+        <div id="header">
+            <h1 class="head">《元官藏》下载(V1.65)</h1>
+        </div>
+
+        <div id="ctrl">
+            <table id="bookMark"></table>
+
+            <a href="" id="volName" target="_blank">经名</a>
+            <a id="page"></a></br>
+
+            <button onclick="ClickNext(-1)">上一页</button>
+            <a id="JmpLabel"></a>
+            <input type="number" id="Jmp" value=""></input>
+            <a id="jump" onclick="Jump()"><b>Go</b></a>
+            <button onclick="ClickNext(1)">下一页</button>
+        </div>
+        <div>
+            <a id="info"></a>
+        </div>
+                                        
+        <div>
+            <table id="pxLevel" cellspacing="5px" align="center">
+                <tr>
+                    <td id="level_4" class="level" onclick="SelectImgLevel(this.id)"><b>缩略版</b></td>
+                    <td id="level_3" class="level" onclick="SelectImgLevel(this.id)"><b>标清版</b></td>
+                    <td id="level_2" class="level" onclick="SelectImgLevel(this.id)"><b>高清版</b></td>
+                    <td id="level_1" class="level" onclick="SelectImgLevel(this.id)"><b>超清版</b></td>                                      
+                </tr>
+            </table>
+        </div>
+
+        <div id="imgDiv">            
+        </div>
+
+        <div id="canDiv1"> 
+            <canvas id="canvas" class="canvas"></canvas>            
+        </div>
+        <div id="canDiv2">             
+        </div>
+        
+</body>
+
+</html>
